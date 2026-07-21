@@ -1,17 +1,25 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { NextResponse } from 'next/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 
-// Clerk v7 middleware - protect /admin routes
+// Clerk v7 middleware - protect /admin routes without crashing if Clerk is not configured.
 export default clerkMiddleware(async (auth, req) => {
-  // Only protect /admin routes
+  const hasClerkKeys = Boolean(
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY
+  );
+
+  if (!hasClerkKeys) {
+    return NextResponse.next();
+  }
+
   if (req.nextUrl.pathname.startsWith('/admin')) {
     const session = await auth();
-    
+
     if (!session?.userId) {
       return session?.redirectToSignIn({ returnBackUrl: req.url });
     }
   }
 
-  return undefined;
+  return NextResponse.next();
 });
 
 export const config = {
