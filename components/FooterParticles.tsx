@@ -1,68 +1,45 @@
 'use client';
 
 import { useMemo } from 'react';
-import Particles from 'react-tsparticles';
 
 export default function FooterParticles() {
-  const options = useMemo(
-    () => ({
-      fullScreen: false,
-      background: undefined,
-      fpsLimit: 60,
-      detectRetina: true,
-      particles: {
-        number: { value: 60, density: { enable: true, area: 800 } },
-        color: { value: ['#7F1D1D', '#C4705B', '#D4C4B5'] },
-        shape: { type: 'circle' },
-        opacity: { value: 0.35, random: true },
-        size: { value: { min: 1, max: 3 } },
-        links: {
-          enable: true,
-          distance: 120,
-          color: '#C4705B',
-          opacity: 0.25,
-          width: 1,
-        },
-        move: {
-          enable: true,
-          speed: 1.2,
-          random: true,
-          outModes: { default: 'out' as const },
-        },
-      },
-      interactivity: {
-        detectsOn: undefined,
-        events: {
-          onHover: {
-            enable: true,
-            mode: 'repulse',
-          },
-          onClick: {
-            enable: true,
-            mode: 'push',
-          },
-        },
-        modes: {
-          repulse: { distance: 80, duration: 0.4 },
-          push: { quantity: 6 },
-        },
-      },
-    }),
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, index) => ({
+        id: index,
+        left: `${(index * 13) % 100}%`,
+        top: `${(index * 17 + 7) % 100}%`,
+        size: 4 + (index % 5) * 2,
+        delay: `${(index % 6) * 0.7}s`,
+        duration: `${8 + (index % 5) * 2}s`,
+      })),
     [],
   );
 
   return (
-    <div
-      className="absolute inset-0 overflow-hidden pointer-events-none"
-      style={{ width: '100%', height: '100%' }}
-    >
-      <Particles
-        id="footer-particles"
-        options={options}
-        style={{ width: '100%', height: '100%' }}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ width: '100%', height: '100%' }}>
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(circle at top, rgba(196, 112, 91, 0.16), transparent 55%)',
+        }}
       />
+      {particles.map((particle) => (
+        <span
+          key={particle.id}
+          className="absolute rounded-full bg-[#c4705b]/70"
+          style={{
+            left: particle.left,
+            top: particle.top,
+            width: particle.size,
+            height: particle.size,
+            opacity: 0.2 + (particle.id % 4) * 0.12,
+            animation: `float ${particle.duration} ease-in-out infinite`,
+            animationDelay: particle.delay,
+          }}
+        />
+      ))}
     </div>
   );
-
 }
 
