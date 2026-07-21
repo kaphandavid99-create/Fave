@@ -1,4 +1,5 @@
 {
-  "buildCommand": "cd pejah && npm run build",
-  "installCommand": "cd pejah && npm install"
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build"
 }
