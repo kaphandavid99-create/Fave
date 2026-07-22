@@ -77,6 +77,8 @@ export default function ServiceDetailPage() {
   };
 
   const handleGalleryImage = (index: number) => {
+    if (!service) return;
+
     setSelectedImageIndex(index + (service.video_url ? 1 : 0));
     setShowGallery(true);
   };
