@@ -80,6 +80,9 @@ export default function AdminLayout({
             <p className="mt-2 text-sm leading-6 text-[#6f5548]">
               Enter the admin password to access the dashboard.
             </p>
+            <div className="mt-3 rounded-xl border border-[#8A4A32]/15 bg-[#F7F1EC]/80 px-3 py-2 text-xs leading-5 text-[#6f5548]">
+              <span className="font-semibold text-[#3A241C]">Hint:</span> The password is the one set in your environment as <span className="font-semibold text-[#8A4A32]">NEXT_PUBLIC_ADMIN_PASSWORD</span>.
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
