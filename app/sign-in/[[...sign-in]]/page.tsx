@@ -1,14 +1,17 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-
-// Dynamically import SignIn to avoid Clerk UI 10s mount timeout from Turbopack
-const DynamicSignIn = dynamic(
-  () => import('@clerk/nextjs').then((mod) => ({ default: mod.SignIn })),
-  { ssr: false, loading: () => <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-[#8A4A32]">Loading...</div></div> }
-);
+import { SignIn } from '@clerk/nextjs';
 
 export default function SignInPage() {
-  return <DynamicSignIn />;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#F7F1EC] px-4 py-12">
+      <SignIn
+        path="/sign-in"
+        routing="path"
+        signInUrl="/sign-in"
+        signUpUrl="/sign-up"
+      />
+    </div>
+  );
 }
 

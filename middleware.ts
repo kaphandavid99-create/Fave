@@ -1,9 +1,15 @@
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-// Keep middleware lightweight so Vercel does not fail before the app renders.
-export function middleware() {
+const isProtectedRoute = createRouteMatcher(['/profile(.*)', '/admin(.*)']);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) {
+    await auth.protect();
+  }
+
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [

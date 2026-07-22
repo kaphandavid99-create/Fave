@@ -16,8 +16,7 @@ import {
   Star,
   Scissors,
   Heart,
-  Info,
-  X
+  Info
 } from 'lucide-react';
 
 interface Service {
@@ -55,11 +54,9 @@ function getVariant(index: number): ServiceCardVariant {
   return mod === 0 ? 'classic' : mod === 1 ? 'elevated' : mod === 2 ? 'glass' : 'showcase';
 }
 
-function VideoGallery({ onBook }: { onBook: (serviceId: string) => void }) {
+function VideoGallery({ onViewDetails }: { onViewDetails: (serviceId: string) => void }) {
   const [videos, setVideos] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedVideo, setSelectedVideo] = useState<Service | null>(null);
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -82,23 +79,6 @@ function VideoGallery({ onBook }: { onBook: (serviceId: string) => void }) {
     fetchVideos();
   }, []);
 
-  const handleViewDetails = (video: Service) => {
-    setSelectedVideo(video);
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedVideo(null);
-  };
-
-  const handleBook = () => {
-    if (selectedVideo) {
-      onBook(selectedVideo.id);
-      handleCloseModal();
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -112,124 +92,53 @@ function VideoGallery({ onBook }: { onBook: (serviceId: string) => void }) {
   }
 
   return (
-    <>
-      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
-        {videos.map((video, index) => (
-          <motion.div
-            key={video.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-            className="flex-shrink-0 w-[280px] snap-start"
-          >
-            <div className="relative w-full h-[400px] bg-black rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow group">
-              <div className="relative w-full h-full">
-                <video
-                  src={video.video_url || ''}
-                  className="w-full h-full object-cover"
-                  controls
-                  playsInline
-                  preload="metadata"
-                />
-              </div>
-              
-              {/* Details Button */}
-              <button
-                onClick={() => handleViewDetails(video)}
-                className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
-                title="View Details"
-              >
-                <Info size={18} className="text-[#8B3A3A]" />
-              </button>
+    <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+      {videos.map((video, index) => (
+        <motion.div
+          key={video.id}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: index * 0.1 }}
+          className="flex-shrink-0 w-[280px] snap-start"
+        >
+          <div className="relative w-full h-[400px] bg-black rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow group cursor-pointer" onClick={() => onViewDetails(video.id)}>
+            <div className="relative w-full h-full">
+              <video
+                src={video.video_url || ''}
+                className="w-full h-full object-cover"
+                controls
+                playsInline
+                preload="metadata"
+              />
             </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Details Modal */}
-      {showModal && selectedVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
-          >
-            {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b border-[#E8DFD3] px-6 py-4 flex items-center justify-between">
-              <h3 className="text-xl font-serif text-[#3A241C]">{selectedVideo.name}</h3>
-              <button
-                onClick={handleCloseModal}
-                className="p-2 hover:bg-[#FDF8F3] rounded-full transition-colors"
-              >
-                <X size={20} className="text-[#454545]" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 space-y-4">
-              {/* Video Preview */}
-              <div className="relative w-full h-[200px] bg-black rounded-xl overflow-hidden">
-                <video
-                  src={selectedVideo.video_url || ''}
-                  className="w-full h-full object-cover"
-                  controls
-                  playsInline
-                  preload="metadata"
-                />
-              </div>
-
-              {/* Description */}
-              {selectedVideo.description && (
-                <div>
-                  <h4 className="text-sm font-medium text-[#8A4A32] mb-2">Description</h4>
-                  <p className="text-[#454545] leading-relaxed">{selectedVideo.description}</p>
-                </div>
-              )}
-
-              {/* Price and Duration */}
-              <div className="flex gap-4">
-                <div className="flex-1 bg-[#FDF8F3] rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <DollarSign size={16} className="text-[#C4705B]" />
-                    <span className="text-sm text-[#8A4A32]">Price</span>
-                  </div>
-                  <p className="text-lg font-semibold text-[#3A241C]">{formatMoneyXaf(selectedVideo.price)}</p>
-                </div>
-                <div className="flex-1 bg-[#FDF8F3] rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Clock size={16} className="text-[#C4705B]" />
-                    <span className="text-sm text-[#8A4A32]">Duration</span>
-                  </div>
-                  <p className="text-lg font-semibold text-[#3A241C]">{selectedVideo.duration} min</p>
-                </div>
-              </div>
-
-              {/* Book Button */}
-              <button
-                onClick={handleBook}
-                className="w-full py-3 bg-[#8A4A32] text-white rounded-xl hover:bg-[#6A3A22] transition font-medium flex items-center justify-center gap-2"
-              >
-                Book Now
-                <ArrowRight size={18} />
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </>
+            
+            {/* Details Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails(video.id);
+              }}
+              className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
+              title="View Details"
+            >
+              <Info size={18} className="text-[#8B3A3A]" />
+            </button>
+          </div>
+        </motion.div>
+      ))}
+    </div>
   );
 }
 
 function ServiceClassicCard({
   service,
   index,
-  onBook,
+  onViewDetails,
 }: {
   service: Service;
   index: number;
-  onBook: () => void;
+  onViewDetails: () => void;
 }) {
   const variant = getVariant(index);
 
@@ -394,7 +303,7 @@ function ServiceClassicCard({
 
           {/* CTA Button - Unique per variant */}
           <button
-            onClick={onBook}
+            onClick={onViewDetails}
             className={
               variant === 'classic'
                 ? 'w-full inline-flex items-center justify-center gap-2 text-[#8B3A3A] text-sm font-semibold py-2.5 px-4 rounded-xl bg-[#F7F1EC] hover:bg-[#C4705B] hover:text-white transition-all duration-300 border border-[#E8DFD3] hover:border-[#C4705B]'
@@ -405,7 +314,7 @@ function ServiceClassicCard({
                     : 'w-full inline-flex items-center justify-center gap-2 text-white text-sm font-semibold py-2.5 px-4 rounded-xl bg-[#8B3A3A] hover:bg-[#6B2A2A] transition-all duration-300 shadow-lg shadow-[#8B3A3A]/20 hover:shadow-[#8B3A3A]/30'
             }
           >
-            Book This Service
+            View Details
             <ChevronRight size={16} />
           </button>
 
@@ -545,7 +454,7 @@ export default function ServicesPage() {
             </p>
           </motion.div>
 
-          <VideoGallery onBook={(serviceId) => router.push(`/book?service_id=${serviceId}`)} />
+          <VideoGallery onViewDetails={(serviceId) => router.push(`/services/${serviceId}`)} />
         </div>
       </section>
 
@@ -577,7 +486,7 @@ export default function ServicesPage() {
                 key={service.id}
                 service={service}
                 index={index}
-                onBook={() => router.push(`/book?service_id=${service.id}`)}
+                onViewDetails={() => router.push(`/services/${service.id}`)}
               />
             ))}
           </div>

@@ -8,6 +8,7 @@ import Transformation from "@/components/Transformation";
 import Newsletter from "@/components/Newsletter";
 import LenisSmoothScroll from "@/components/LenisSmoothScroll";
 import WaveWakeCarousel from "@/components/WaveWakeCarousel";
+import WhyChooseUs from "@/components/WhyChooseUs";
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
         </section>
         <WaveWakeCarousel />
         <Standards />
+        <WhyChooseUs />
         <FeaturedStyle />
         <Transformation />
         <Newsletter />

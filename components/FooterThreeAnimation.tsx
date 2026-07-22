@@ -45,47 +45,126 @@ export default function FooterThreeAnimation() {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.z = 80;
+    camera.position.z = 60;
 
-    // points
-    const count = 220;
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
+    // Flower colors
+    const flowerColors = [
+      new THREE.Color('#C4705B'), // Terracotta
+      new THREE.Color('#D4A574'), // Gold
+      new THREE.Color('#8B3A3A'), // Deep brown
+      new THREE.Color('#D4C4B5'), // Light beige
+      new THREE.Color('#E8DFD3'), // Soft cream
+    ];
 
-    const colorA = new THREE.Color('#7F1D1D');
-    const colorB = new THREE.Color('#C4705B');
-    const colorC = new THREE.Color('#D4C4B5');
-    const colorsPool = [colorA, colorB, colorC];
+    // Create flower petals
+    const petals: THREE.Mesh[] = [];
+    const flowerCount = 8;
 
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3;
-      positions[i3 + 0] = (Math.random() - 0.5) * 120;
-      positions[i3 + 1] = (Math.random() - 0.5) * 40;
-      positions[i3 + 2] = (Math.random() - 0.5) * 10;
-
-      const c = colorsPool[Math.floor(Math.random() * colorsPool.length)];
-      colors[i3 + 0] = c.r;
-      colors[i3 + 1] = c.g;
-      colors[i3 + 2] = c.b;
+    for (let f = 0; f < flowerCount; f++) {
+      const flowerGroup = new THREE.Group();
+      
+      // Random position
+      flowerGroup.position.x = (Math.random() - 0.5) * 100;
+      flowerGroup.position.y = (Math.random() - 0.5) * 30;
+      flowerGroup.position.z = (Math.random() - 0.5) * 20;
+      
+      // Random scale
+      const scale = 0.5 + Math.random() * 1.5;
+      flowerGroup.scale.set(scale, scale, scale);
+      
+      // Random rotation
+      flowerGroup.rotation.z = Math.random() * Math.PI * 2;
+      
+      const petalCount = 5 + Math.floor(Math.random() * 4);
+      const petalColor = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+      
+      for (let p = 0; p < petalCount; p++) {
+        // Create petal shape using curved geometry
+        const petalGeometry = new THREE.Shape();
+        petalGeometry.moveTo(0, 0);
+        petalGeometry.quadraticCurveTo(0.5, 0.3, 1, 0);
+        petalGeometry.quadraticCurveTo(0.5, -0.3, 0, 0);
+        
+        const extrudeSettings = {
+          steps: 1,
+          depth: 0.05,
+          bevelEnabled: true,
+          bevelThickness: 0.02,
+          bevelSize: 0.02,
+          bevelSegments: 3
+        };
+        
+        const petalMeshGeometry = new THREE.ExtrudeGeometry(petalGeometry, extrudeSettings);
+        const petalMaterial = new THREE.MeshBasicMaterial({
+          color: petalColor,
+          transparent: true,
+          opacity: 0.6 + Math.random() * 0.3,
+          side: THREE.DoubleSide
+        });
+        
+        const petal = new THREE.Mesh(petalMeshGeometry, petalMaterial);
+        
+        // Position petal around center
+        const angle = (p / petalCount) * Math.PI * 2;
+        petal.position.x = Math.cos(angle) * 0.3;
+        petal.position.y = Math.sin(angle) * 0.3;
+        petal.rotation.z = angle;
+        
+        flowerGroup.add(petal);
+        petals.push(petal);
+      }
+      
+      // Add center
+      const centerGeometry = new THREE.CircleGeometry(0.15, 16);
+      const centerMaterial = new THREE.MeshBasicMaterial({
+        color: new THREE.Color('#8A4A32'),
+        transparent: true,
+        opacity: 0.8
+      });
+      const center = new THREE.Mesh(centerGeometry, centerMaterial);
+      flowerGroup.add(center);
+      
+      scene.add(flowerGroup);
     }
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    // Add floating particles
+    const particleCount = 150;
+    const particleGeometry = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    const particleColors = new Float32Array(particleCount * 3);
+    const particleSizes = new Float32Array(particleCount);
 
-    const material = new THREE.PointsMaterial({
-      size: 1.1,
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3;
+      particlePositions[i3] = (Math.random() - 0.5) * 120;
+      particlePositions[i3 + 1] = (Math.random() - 0.5) * 40;
+      particlePositions[i3 + 2] = (Math.random() - 0.5) * 20;
+      
+      const color = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+      particleColors[i3] = color.r;
+      particleColors[i3 + 1] = color.g;
+      particleColors[i3 + 2] = color.b;
+      
+      particleSizes[i] = 0.5 + Math.random() * 1.5;
+    }
+
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+    particleGeometry.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+
+    const particleMaterial = new THREE.PointsMaterial({
+      size: 0.8,
       vertexColors: true,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.5,
       depthWrite: false,
     });
 
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
+    const particles = new THREE.Points(particleGeometry, particleMaterial);
+    scene.add(particles);
 
     let raf = 0;
-    const clock = new THREE.Clock();
+    let startTime = Date.now();
     let isDisposed = false;
 
     const onResize = () => {
@@ -102,13 +181,27 @@ export default function FooterThreeAnimation() {
 
     const animate = () => {
       if (isDisposed || !renderer) return;
-      const t = clock.getElapsedTime();
-      points.rotation.y = t * 0.12;
-      points.rotation.x = Math.sin(t * 0.4) * 0.06;
-      material.opacity = 0.45 + Math.sin(t * 0.7) * 0.12;
+      const t = (Date.now() - startTime) / 1000;
 
-      // float
-      points.position.y = Math.sin(t * 0.6) * 1.2;
+      // Animate flower petals (blooming effect)
+      petals.forEach((petal, index) => {
+        const bloomPhase = t * 0.5 + index * 0.1;
+        const scale = 1 + Math.sin(bloomPhase) * 0.2;
+        petal.scale.set(scale, scale, scale);
+        petal.rotation.z += 0.01;
+      });
+
+      // Rotate entire scene slowly
+      scene.rotation.y = t * 0.05;
+      scene.rotation.x = Math.sin(t * 0.2) * 0.05;
+
+      // Animate particles
+      particles.rotation.y = t * 0.03;
+      particles.rotation.x = Math.sin(t * 0.3) * 0.02;
+      particleMaterial.opacity = 0.4 + Math.sin(t * 0.5) * 0.15;
+
+      // Gentle floating motion
+      scene.position.y = Math.sin(t * 0.4) * 0.5;
 
       try {
         renderer.render(scene, camera);
@@ -125,9 +218,23 @@ export default function FooterThreeAnimation() {
       isDisposed = true;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
-      geometry.dispose();
-      material.dispose();
+      
+      // Dispose geometries and materials
+      petals.forEach(petal => {
+        if (petal.geometry) petal.geometry.dispose();
+        if (petal.material) {
+          if (Array.isArray(petal.material)) {
+            petal.material.forEach(m => m.dispose());
+          } else {
+            petal.material.dispose();
+          }
+        }
+      });
+      
+      particleGeometry.dispose();
+      particleMaterial.dispose();
       scene.clear();
+      
       if (renderer) {
         renderer.dispose();
         if (renderer.domElement.parentNode) {
