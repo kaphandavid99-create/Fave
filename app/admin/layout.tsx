@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ClerkUserButtonClientOnly from '@/components/admin/ClerkUserButtonClientOnly';
@@ -31,7 +31,31 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const pathname = usePathname();
+
+  const expectedPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'FaveAdmin2026!';
+
+  useEffect(() => {
+    const storedPassword = window.sessionStorage.getItem('fave-admin-auth');
+    if (storedPassword === expectedPassword) {
+      setIsAuthorized(true);
+    }
+  }, [expectedPassword]);
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (password === expectedPassword) {
+      window.sessionStorage.setItem('fave-admin-auth', expectedPassword);
+      setIsAuthorized(true);
+      setError('');
+    } else {
+      setError('Incorrect password. Please try again.');
+    }
+  };
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -45,6 +69,47 @@ export default function AdminLayout({
     { name: 'Availability', href: '/admin/availability', icon: Clock },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,#f7efe8,#f2e0d1_60%,#e8d5c5)] px-4 py-10">
+        <div className="w-full max-w-md rounded-3xl border border-[#8A4A32]/15 bg-white/90 p-8 shadow-[0_20px_70px_rgba(58,36,28,0.15)] backdrop-blur">
+          <div className="mb-6 text-center">
+            <p className="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-[#8A4A32]">Private access</p>
+            <h1 className="text-2xl font-serif text-[#3A241C]">Fave&apos;s Touch Admin</h1>
+            <p className="mt-2 text-sm leading-6 text-[#6f5548]">
+              Enter the admin password to access the dashboard.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="admin-password" className="mb-2 block text-sm font-medium text-[#3A241C]">
+                Admin password
+              </label>
+              <input
+                id="admin-password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Enter password"
+                className="w-full rounded-xl border border-[#3A241C]/15 bg-[#F7F1EC] px-4 py-3 text-sm text-[#3A241C] outline-none transition focus:border-[#8A4A32] focus:ring-2 focus:ring-[#8A4A32]/20"
+              />
+            </div>
+
+            {error && <p className="text-sm text-[#b23a3a]">{error}</p>}
+
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-[#8A4A32] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6A3A22]"
+            >
+              Access dashboard
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F7F1EC]">
